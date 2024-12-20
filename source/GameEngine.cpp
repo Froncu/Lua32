@@ -402,7 +402,7 @@ bool GameEngine::MessageContinue(const tstring& message) const
 		return MessageBoxW(GetWindow(), message.c_str(), m_Title.c_str(), MB_ICONWARNING | MB_OKCANCEL) == IDOK;
 	#else
 		return MessageBoxA(GetWindow(), message.c_str(), m_Title.c_str(), MB_ICONWARNING | MB_OKCANCEL) == IDOK;
-	#endif 
+	#endif
 }
 
 void GameEngine::MessageBox(const tstring& message) const
