@@ -16,6 +16,8 @@
 
 #include <vector>			// using std::vector for tab control logic
 
+#include "Resource.h"
+
 using namespace std;
 
 //-----------------------------------------------------------------
@@ -309,6 +311,7 @@ bool GameEngine::CreateGameWindow(int cmdShow)
 	wndclass.hCursor        = LoadCursor(NULL, IDC_ARROW);
 	wndclass.lpszClassName  = m_Title.c_str();
 	
+	wndclass.hIcon = LoadIcon(m_Instance, MAKEINTRESOURCE(IDI_BIG));
 	// Register the window class
 	if (!RegisterClassEx(&wndclass)) return false;
 	
@@ -398,7 +401,7 @@ bool GameEngine::MessageContinue(const tstring& message) const
 	#ifdef UNICODE						
 		return MessageBoxW(GetWindow(), message.c_str(), m_Title.c_str(), MB_ICONWARNING | MB_OKCANCEL) == IDOK;
 	#else
-		return MessageBoxA(GetWindow(), text.c_str(), m_Title.c_str(), MB_ICONWARNING | MB_OKCANCEL) == IDOK;
+		return MessageBoxA(GetWindow(), message.c_str(), m_Title.c_str(), MB_ICONWARNING | MB_OKCANCEL) == IDOK;
 	#endif 
 }
 
@@ -408,7 +411,7 @@ void GameEngine::MessageBox(const tstring& message) const
 	#ifdef UNICODE						
 		MessageBoxW(GetWindow(), message.c_str(), m_Title.c_str(), MB_ICONEXCLAMATION | MB_OK);
 	#else
-		MessageBoxA(GetWindow(), text.c_str(), m_Title.c_str(), MB_ICONEXCLAMATION | MB_OK);
+		MessageBoxA(GetWindow(), message.c_str(), m_Title.c_str(), MB_ICONEXCLAMATION | MB_OK);
 	#endif 
 }
 
