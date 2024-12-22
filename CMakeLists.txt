@@ -11,3 +11,8 @@ add_executable(${PROJECT_NAME}
 target_compile_options(${PROJECT_NAME} PRIVATE /source-charset:utf-8)
 target_compile_definitions(${PROJECT_NAME} PRIVATE UNICODE _UNICODE)
 target_link_options(${PROJECT_NAME} PRIVATE /SUBSYSTEM:WINDOWS)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20)
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+include(lua)
+include(sol2)
