@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.12)
 project(Win32)
 
+if(NOT MSVC)
+   message(FATAL_ERROR "This project currently can be build only using Microsoft Visual C++ (MSVC).")
+endif()
+
 add_executable(${PROJECT_NAME}
    engine/AbstractGame.cpp
    engine/Game.cpp
