@@ -5,6 +5,8 @@ if(NOT MSVC)
    message(FATAL_ERROR "This project currently can be build only using Microsoft Visual C++ (MSVC).")
 endif()
 
+set(BUILD_TESTING OFF)
+
 add_executable(${PROJECT_NAME}
    engine/AbstractGame.cpp
    engine/Game.cpp
