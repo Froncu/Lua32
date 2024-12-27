@@ -51,7 +51,7 @@ void Game::End()
 	// Insert code that needs to execute when the game ends
 }
 
-void Game::Paint(RECT rect) const
+void Game::Paint() const
 {
 	// Insert paint code
 }
