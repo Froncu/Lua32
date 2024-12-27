@@ -40,6 +40,6 @@ public:
 	virtual void MouseMove(int x, int y, WPARAM wParam) = 0; // pure virtual function
 	virtual void CheckKeyboard() = 0; // pure virtual function
 	virtual void KeyPressed(TCHAR key) = 0; // pure virtual function
-	virtual void Paint(RECT rect) const = 0; // pure virtual function
+	virtual void Paint() const = 0; // pure virtual function
 	virtual void Tick() = 0; // pure virtual function
 };

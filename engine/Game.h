@@ -40,7 +40,7 @@ public:
 	void Initialize() override;
 	void Start() override;
 	void End() override;
-	void Paint(RECT rect) const override;
+	void Paint() const override;
 	void Tick() override;
 	void MouseButtonAction(bool isLeft, bool isDown, int x, int y, WPARAM wParam) override;
 	void MouseWheelAction(int x, int y, int distance, WPARAM wParam) override;

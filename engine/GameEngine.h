@@ -78,6 +78,8 @@ public:
 	void SetFrameRate(int frameRate);
 	void SetWidth(int width);
 	void SetHeight(int height);
+	void SetWidthDraw(int width);
+	void SetHeightDraw(int height);
 
 	bool GoFullscreen();
 	bool GoWindowedMode();
@@ -104,10 +106,11 @@ public:
 	SIZE CalculateTextDimensions(const tstring& text, const Font* fontPtr, RECT rect) const;
 
 	// Draw Functions
+	void SetDrawTransform(XFORM const& transform);
 	void SetColor(COLORREF color);
 	void SetFont(Font* fontPtr);
 
-	bool FillWindowRect(COLORREF color) const;
+	bool FillDrawRect(COLORREF color) const;
 
 	bool DrawLine(int x1, int y1, int x2, int y2) const;
 
@@ -154,6 +157,22 @@ public:
 	{
 		return m_Height;
 	}
+	int GetWidthDraw() const
+	{
+		return m_HalfWidthDraw * 2;
+	}
+	int GetHeightDraw() const
+	{
+		return m_HalfHeightDraw * 2;
+	}
+	int GetHalfWidthDraw() const
+	{
+		return m_HalfWidthDraw;
+	}
+	int GetHalfHeightDraw() const
+	{
+		return m_HalfHeightDraw;
+	}
 	int GetFrameRate() const
 	{
 		return m_FrameRate;
@@ -187,6 +206,8 @@ private:
 	tstring m_Title{};
 	int m_Width{};
 	int m_Height{};
+	int m_HalfWidthDraw{};
+	int m_HalfHeightDraw{};
 	int m_FrameRate{ 50 };
 	int m_FrameDelay{ 1000 / m_FrameRate };
 	bool m_RunGameLoop{ true };
@@ -199,8 +220,8 @@ private:
 	ULONG_PTR m_GDIPlusToken;
 
 	// Draw assistance variables
+	XFORM m_DrawTransform{ 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f };
 	HDC m_HdcDraw{};
-	RECT m_RectDraw{};
 	bool m_IsPainting{};
 	COLORREF m_ColDraw{};
 	HFONT m_FontDraw{};

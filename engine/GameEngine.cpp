@@ -104,11 +104,17 @@ bool GameEngine::Run(HINSTANCE hInstance, int cmdShow)
 	HDC hBufferDC = CreateCompatibleDC(hDC);
 
 	// Create the buffer
-	HBITMAP hBufferBmp = CreateCompatibleBitmap(hDC, m_Width, m_Height);
+	if (!m_HalfWidthDraw)
+		m_HalfWidthDraw = m_Width / 2;
+
+	if (!m_HalfHeightDraw)
+		m_HalfHeightDraw = m_Height / 2;
+
+	HBITMAP hBufferBmp = CreateCompatibleBitmap(hDC, GetWidthDraw(), GetHeightDraw());
 	HBITMAP hOldBmp = (HBITMAP)SelectObject(hBufferDC, hBufferBmp);
 
 	m_HdcDraw = hBufferDC;
-	GetClientRect(m_Window, &m_RectDraw);
+	SetGraphicsMode(m_HdcDraw, GM_ADVANCED);
 
 	// Framerate control
 	LARGE_INTEGER tickFrequency, tickTrigger, currentTick;
@@ -166,11 +172,21 @@ bool GameEngine::Run(HINSTANCE hInstance, int cmdShow)
 void GameEngine::PaintDoubleBuffered(HDC hDC)
 {
 	m_IsPainting = true;
-	m_GamePtr->Paint(m_RectDraw);
+	FillDrawRect(RGB(0, 0, 0));
+	SetViewportOrgEx(m_HdcDraw, m_HalfWidthDraw, m_HalfHeightDraw, nullptr);
+	m_GamePtr->Paint();
 	m_IsPainting = false;
 
-	// As a last step copy the buffer DC to the window DC
-	BitBlt(hDC, 0, 0, m_Width, m_Height, m_HdcDraw, 0, 0, SRCCOPY);
+	SetViewportOrgEx(m_HdcDraw, 0, 0, nullptr);
+
+	// Set the world transform to the identity for a correct copy in the next step
+	ModifyWorldTransform(m_HdcDraw, NULL, MWT_IDENTITY);
+
+	// Copy the buffer DC to the window DC
+	StretchBlt(hDC, 0, 0, m_Width, m_Height, m_HdcDraw, 0, 0, GetWidthDraw(), GetHeightDraw(), SRCCOPY);
+
+	// Reset the world transform to the previous value
+	SetWorldTransform(m_HdcDraw, &m_DrawTransform);
 }
 
 void GameEngine::ShowMousePointer(bool value)
@@ -372,6 +388,16 @@ void GameEngine::SetHeight(int height)
 	m_Height = height;
 }
 
+void GameEngine::SetWidthDraw(int width)
+{
+	m_HalfWidthDraw = width / 2;
+}
+
+void GameEngine::SetHeightDraw(int height)
+{
+	m_HalfHeightDraw = height / 2;
+}
+
 void GameEngine::Quit()
 {
 	PostMessage(GameEngine::GetWindow(), WM_DESTROY, NULL, NULL);
@@ -479,6 +505,12 @@ SIZE GameEngine::CalculateTextDimensions(const tstring& text, const Font* fontPt
 	ReleaseDC(NULL, hdc);
 
 	return size;
+}
+
+void GameEngine::SetDrawTransform(XFORM const& transform)
+{
+	m_DrawTransform = transform;
+	SetWorldTransform(m_HdcDraw, &m_DrawTransform);
 }
 
 bool GameEngine::DrawLine(int x1, int y1, int x2, int y2) const
@@ -1033,13 +1065,13 @@ bool GameEngine::DrawBitmap(const Bitmap* bitmapPtr, int left, int top) const
 	else return false;
 }
 
-bool GameEngine::FillWindowRect(COLORREF color) const
+bool GameEngine::FillDrawRect(COLORREF color) const
 {
 	if (m_IsPainting)
 	{
 		COLORREF oldColor = GetDrawColor();
 		const_cast<GameEngine*>(this)->SetColor(color);
-		FillRect(0, 0, m_RectDraw.right, m_RectDraw.bottom);
+		FillRect(0, 0, GetWidthDraw(), GetHeightDraw());
 		const_cast<GameEngine*>(this)->SetColor(oldColor);
 
 		return true;
