@@ -129,7 +129,9 @@ public:
 	int DrawString(const tstring& text, int left, int top, int right, int bottom) const;
 
 	bool DrawBitmap(const Bitmap* bitmapPtr, int left, int top) const;
+	bool DrawBitmapCentered(const Bitmap* bitmapPtr, int x, int y) const;
 	bool DrawBitmap(const Bitmap* bitmapPtr, int left, int top, RECT sourceRect) const;
+	bool DrawBitmapCentered(const Bitmap* bitmapPtr, int x, int y, RECT sourceRect) const;
 
 	bool DrawPolygon(const POINT ptsArr[], int count) const;
 	bool DrawPolygon(const POINT ptsArr[], int count, bool close) const;
@@ -598,6 +600,8 @@ public:
 	bool Exists() const;
 	int GetWidth() const;
 	int GetHeight() const;
+	int GetHalfWidth() const;
+	int GetHalfHeight() const;
 	COLORREF GetTransparencyColor() const;
 	int GetOpacity() const;
 	bool HasAlphaChannel() const;
@@ -616,6 +620,8 @@ private:
 	int m_Opacity{ 100 };
 	unsigned char* m_PixelsPtr{};
 	bool m_HasAlphaChannel;
+	int m_HalfWidth{};
+	int m_HalfHeight{};
 
 	// -------------------------
 	// Member Functions

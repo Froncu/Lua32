@@ -1050,6 +1050,11 @@ bool GameEngine::DrawBitmap(const Bitmap* bitmapPtr, int left, int top, RECT rec
 	else return false;
 }
 
+bool GameEngine::DrawBitmapCentered(const Bitmap* bitmapPtr, int x, int y, RECT sourceRect) const
+{
+	return DrawBitmap(bitmapPtr, x - bitmapPtr->GetHalfWidth(), y - bitmapPtr->GetHalfHeight(), sourceRect);
+}
+
 bool GameEngine::DrawBitmap(const Bitmap* bitmapPtr, int left, int top) const
 {
 	if (m_IsPainting)
@@ -1063,6 +1068,11 @@ bool GameEngine::DrawBitmap(const Bitmap* bitmapPtr, int left, int top) const
 		return DrawBitmap(bitmapPtr, left, top, rect);
 	}
 	else return false;
+}
+
+bool GameEngine::DrawBitmapCentered(const Bitmap* bitmapPtr, int x, int y) const
+{
+	return DrawBitmap(bitmapPtr, x - bitmapPtr->GetHalfWidth(), y - bitmapPtr->GetHalfHeight());
 }
 
 bool GameEngine::FillDrawRect(COLORREF color) const
@@ -1292,6 +1302,9 @@ Bitmap::Bitmap(const tstring& filename, bool createAlphaChannel) : m_HasAlphaCha
 		if (createAlphaChannel) CreateAlphaChannel();
 	}
 	else throw UnsupportedFormatException{ filename };
+
+	m_HalfWidth = GetWidth() / 2;
+	m_HalfHeight = GetHeight() / 2;
 }
 
 /*
@@ -1457,6 +1470,20 @@ int Bitmap::GetHeight() const
 	GetObject(m_hBitmap, sizeof(bm), &bm);
 
 	return bm.bmHeight;
+}
+
+int Bitmap::GetHalfWidth() const
+{
+	if (!Exists()) return 0;
+
+	return m_HalfWidth;
+}
+
+int Bitmap::GetHalfHeight() const
+{
+	if (!Exists()) return 0;
+
+	return m_HalfHeight;
 }
 
 void Bitmap::SetTransparencyColor(COLORREF color) // converts transparency value to pixel-based alpha
