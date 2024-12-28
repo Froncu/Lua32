@@ -14,7 +14,22 @@
 
 Game::Game()
 {
-	// nothing to create
+#ifndef NDEBUG
+	if (!AllocConsole())
+		return;
+
+	FILE *fp;
+	freopen_s(&fp, "CONOUT$", "w", stdout);
+	setvbuf(stdout, NULL, _IONBF, 0);
+
+	freopen_s(&fp, "CONOUT$", "w", stderr);
+	setvbuf(stderr, NULL, _IONBF, 0);
+
+	freopen_s(&fp, "CONIN$", "r", stdin);
+	setvbuf(stdin, NULL, _IONBF, 0);
+
+	std::ios::sync_with_stdio(true);
+#endif
 }
 
 Game::~Game()
