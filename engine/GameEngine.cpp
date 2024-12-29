@@ -107,11 +107,9 @@ bool GameEngine::Run(HINSTANCE hInstance, int cmdShow)
 	HDC hBufferDC = CreateCompatibleDC(hDC);
 
 	// Create the buffer
-	if (!m_HalfWidthDraw)
-		m_HalfWidthDraw = m_Width / 2;
+	if (!m_HalfWidthDraw) m_HalfWidthDraw = m_Width / 2;
 
-	if (!m_HalfHeightDraw)
-		m_HalfHeightDraw = m_Height / 2;
+	if (!m_HalfHeightDraw) m_HalfHeightDraw = m_Height / 2;
 
 	HBITMAP hBufferBmp = CreateCompatibleBitmap(hDC, GetWidthDraw(), GetHeightDraw());
 	HBITMAP hOldBmp = (HBITMAP)SelectObject(hBufferDC, hBufferBmp);
