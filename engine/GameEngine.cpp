@@ -16,8 +16,15 @@
 
 #include <vector> // using std::vector for tab control logic
 
+// used for SVG parsing
+#include <msxml.h>
+class Font; // forward declared to prevent comdef from making Font ambigous
+#include <comdef.h>
 #undef small // see line 123 in enumerate_liteal_values.inc from SVGPP
+#include <svgpp/policy/xml/msxml.hpp>
 #include <svgpp/svgpp.hpp>
+
+#include <format>
 
 #include "Resource.h"
 
@@ -429,6 +436,122 @@ bool GameEngine::MessageContinue(const tstring& message) const
 #else
 	return MessageBoxA(GetWindow(), message.c_str(), m_Title.c_str(), MB_ICONWARNING | MB_OKCANCEL) == IDOK;
 #endif
+}
+
+std::vector<std::vector<POINTFLOAT>> GameEngine::ParseSVGPolygons(const tstring& path)
+{
+	struct Context final
+	{
+		void path_move_to(double x, double y, svgpp::tag::coordinate::absolute)
+		{
+			POINTFLOAT point{ .x{ static_cast<FLOAT>(x) }, .y{ static_cast<FLOAT>(y) } };
+			polygons.emplace_back().push_back(point);
+
+			if (point.x < topLeft.x) topLeft.x = point.x;
+			if (point.y < topLeft.y) topLeft.y = point.y;
+			if (point.x > bottomRight.x) bottomRight.x = point.x;
+			if (point.y > bottomRight.y) bottomRight.y = point.y;
+		}
+
+		void path_line_to(double x, double y, svgpp::tag::coordinate::absolute)
+		{
+			POINTFLOAT point{ .x{ static_cast<FLOAT>(x) }, .y{ static_cast<FLOAT>(y) } };
+			polygons.back().push_back(point);
+
+			if (point.x < topLeft.x) topLeft.x = point.x;
+			if (point.y < topLeft.y) topLeft.y = point.y;
+			if (point.x > bottomRight.x) bottomRight.x = point.x;
+			if (point.y > bottomRight.y) bottomRight.y = point.y;
+		}
+
+		void path_cubic_bezier_to(double x1, double y1, double x2, double y2, double x, double y, svgpp::tag::coordinate::absolute) {}
+
+		void path_quadratic_bezier_to(double x1, double y1, double x, double y, svgpp::tag::coordinate::absolute) {}
+
+		void path_elliptical_arc_to(double rx, double ry, double x_axis_rotation, bool large_arc_flag, bool sweep_flag, double x, double y, svgpp::tag::coordinate::absolute) {}
+
+		void path_close_subpath() {}
+
+		void path_exit() {}
+
+		void on_enter_element(svgpp::tag::element::any) {}
+
+		void on_exit_element() {}
+
+		std::vector<std::vector<POINTFLOAT>> polygons{};
+		POINTFLOAT topLeft{ INFINITY, INFINITY };
+		POINTFLOAT bottomRight{ -INFINITY, -INFINITY };
+	} context{};
+
+	const struct CoInitializeRAII final
+	{
+		CoInitializeRAII(LPVOID pvReserved)
+		{
+			CoInitialize(pvReserved);
+		}
+		~CoInitializeRAII()
+		{
+			CoUninitialize();
+		}
+	} coInitializeRAII{ NULL };
+
+	IXMLDOMDocument* XMLDocPtr;
+	if (FAILED(CoCreateInstance(CLSID_DOMDocument, NULL, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, reinterpret_cast<void**>(&XMLDocPtr))))
+	{
+		tcout << _T("Failed to create XML DOM instance\n");
+		return {};
+	}
+
+	if (VARIANT_BOOL success; FAILED(XMLDocPtr->load(_variant_t(path.c_str()), &success)))
+	{
+		tcout << std::format(_T("Failed to load the \"{}\" XML document\n"), path);
+		XMLDocPtr->Release();
+		return {};
+	}
+
+	IXMLDOMNodeList* nodeListPtr;
+	if (FAILED(XMLDocPtr->getElementsByTagName(const_cast<BSTR>(_T("svg")), &nodeListPtr)) || !nodeListPtr)
+	{
+		tcout << _T("Failed to get <svg> elements\n");
+		XMLDocPtr->Release();
+		return {};
+	}
+	XMLDocPtr->Release();
+
+	IXMLDOMNode* nodePtr;
+	if (FAILED(nodeListPtr->get_item(0, &nodePtr)))
+	{
+		tcout << "No <svg> element found\n";
+		nodeListPtr->Release();
+		return {};
+	}
+	nodeListPtr->Release();
+
+	IXMLDOMElement* elementPtr;
+	if (FAILED(nodePtr->QueryInterface(IID_IXMLDOMElement, reinterpret_cast<void**>(&elementPtr))))
+	{
+		tcout << "Failed to cast nodePtr to elementPtr\n";
+		nodePtr->Release();
+		nodeListPtr->Release();
+		return {};
+	}
+	nodePtr->Release();
+
+	using ProcessedElements = boost::mpl::set<svgpp::tag::element::svg, svgpp::tag::element::g, svgpp::tag::element::circle, svgpp::tag::element::ellipse, svgpp::tag::element::line, svgpp::tag::element::path,
+		svgpp::tag::element::polygon, svgpp::tag::element::polyline, svgpp::tag::element::rect>::type;
+
+	svgpp::document_traversal<svgpp::processed_elements<ProcessedElements>, svgpp::processed_attributes<svgpp::traits::shapes_attributes_by_element>>::load_document(elementPtr, context);
+	elementPtr->Release();
+
+	POINTFLOAT const center{ .x{ (context.bottomRight.x - context.topLeft.x) / 2 }, .y{ (context.bottomRight.y - context.topLeft.y) / 2 } };
+	for (std::vector<POINTFLOAT>& polygon : context.polygons)
+		for (POINTFLOAT& vertex : polygon)
+		{
+			vertex.x -= center.x;
+			vertex.y -= center.y;
+		}
+
+	return context.polygons;
 }
 
 void GameEngine::MessageBox(const tstring& message) const
