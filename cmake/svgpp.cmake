@@ -15,13 +15,12 @@ target_include_directories(${SVGPP_LIB} INTERFACE ${${SVGPP_LIB}_SOURCE_DIR}/inc
 set(BOOST_LIB Boost)
 set(BOOST_INCLUDE_LIBRARIES utility tti iterator range algorithm format math ratio variant spirit)
 foreach(LIB ${BOOST_INCLUDE_LIBRARIES})
-   list(APPEND BOOST_TARGET_LIBRARIES Boost::${LIB})
+   list(APPEND BOOST_TARGET_LIBRARIES ${BOOST_LIB}::${LIB})
 endforeach()
 set(BOOST_ENABLE_CMAKE ON)
 
 fetchcontent_declare(${BOOST_LIB}
    URL https://github.com/boostorg/boost/releases/download/boost-1.84.0/boost-1.84.0.7z
-   USES_TERMINAL_DOWNLOAD TRUE
    DOWNLOAD_NO_EXTRACT FALSE
    DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
 fetchcontent_makeavailable(${BOOST_LIB})
