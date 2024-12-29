@@ -16,6 +16,9 @@
 
 #include <vector> // using std::vector for tab control logic
 
+#undef small // see line 123 in enumerate_liteal_values.inc from SVGPP
+#include <svgpp/svgpp.hpp>
+
 #include "Resource.h"
 
 using namespace std;
