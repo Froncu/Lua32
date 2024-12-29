@@ -43,10 +43,9 @@ GameEngine::GameEngine()
 
 	// open console in debug mode
 #ifndef NDEBUG
-	if (!AllocConsole())
-		return;
+	if (!AllocConsole()) return;
 
-	FILE *fp;
+	FILE* fp;
 	freopen_s(&fp, "CONOUT$", "w", stdout);
 	setvbuf(stdout, NULL, _IONBF, 0);
 
