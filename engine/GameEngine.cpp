@@ -23,6 +23,7 @@ class Font; // forward declared to prevent comdef from making Font ambigous
 #undef small // see line 123 in enumerate_liteal_values.inc from SVGPP
 #include <svgpp/policy/xml/msxml.hpp>
 #include <svgpp/svgpp.hpp>
+#include <polypartition.h>
 
 #include <format>
 
@@ -561,6 +562,49 @@ std::vector<std::vector<POINTFLOAT>> GameEngine::ParseSVGPolygons(const tstring&
 		}
 
 	return context.polygons;
+}
+
+std::vector<std::vector<POINTFLOAT>> GameEngine::ParseSVGPolygonsPartitioned(const tstring& path)
+{
+	std::vector<std::vector<POINTFLOAT>> polygons{ ParseSVGPolygons(path) };
+
+	std::vector<std::vector<POINTFLOAT>> partitionedPolygons{};
+	for (std::vector<POINTFLOAT>& polygon : polygons)
+	{
+		TPPLPoly convertedPolygon{};
+		convertedPolygon.Init(polygon.size());
+		for (long index{}; index < polygon.size(); ++index)
+		{
+			const auto [x, y] { polygon[index] };
+			convertedPolygon.GetPoint(index) = { .x{ x }, .y{ y } };
+		}
+
+		TPPLPolyList partitionedNativePolygon{};
+		if (!TPPLPartition{}.ConvexPartition_HM(&convertedPolygon, &partitionedNativePolygon))
+		{
+			tcout << _T("Convex partition failed for the following polygon:\n");
+			for (std::size_t index{}; index < convertedPolygon.GetNumPoints(); ++index)
+			{
+				const auto [x, y, ID] { convertedPolygon.GetPoint(index) };
+				tcout << std::format(_T("[{}, {}]\n"), x, y);
+			}
+
+			partitionedPolygons.push_back(std::move(polygon));
+			continue;
+		}
+
+		for (const TPPLPoly& nativePolygon : partitionedNativePolygon)
+		{
+			partitionedPolygons.emplace_back();
+			for (long index{}; index < nativePolygon.GetNumPoints(); ++index)
+			{
+				const auto [x, y, ID] { nativePolygon.GetPoint(index) };
+				partitionedPolygons.back().push_back({ .x{ static_cast<FLOAT>(x) }, .y{ static_cast<FLOAT>(y) } });
+			}
+		}
+	}
+
+	return partitionedPolygons;
 }
 
 void GameEngine::MessageBox(const tstring& message) const

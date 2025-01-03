@@ -103,6 +103,7 @@ public:
 	bool MessageContinue(const tstring& message) const;
 
 	std::vector<std::vector<POINTFLOAT>> ParseSVGPolygons(const tstring& path);
+	std::vector<std::vector<POINTFLOAT>> ParseSVGPolygonsPartitioned(const tstring& path);
 
 	// Text Dimensions
 	SIZE CalculateTextDimensions(const tstring& text, const Font* fontPtr) const;
