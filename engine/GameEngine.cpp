@@ -464,11 +464,20 @@ std::vector<std::vector<POINTFLOAT>> GameEngine::ParseSVGPolygons(const tstring&
 			if (point.y > bottomRight.y) bottomRight.y = point.y;
 		}
 
-		void path_cubic_bezier_to(double x1, double y1, double x2, double y2, double x, double y, svgpp::tag::coordinate::absolute) {}
+		void path_cubic_bezier_to(double x1, double y1, double x2, double y2, double x, double y, svgpp::tag::coordinate::absolute coordinate)
+		{
+			path_line_to(x, y, coordinate);
+		}
 
-		void path_quadratic_bezier_to(double x1, double y1, double x, double y, svgpp::tag::coordinate::absolute) {}
+		void path_quadratic_bezier_to(double x1, double y1, double x, double y, svgpp::tag::coordinate::absolute coordinate)
+		{
+			path_line_to(x, y, coordinate);
+		}
 
-		void path_elliptical_arc_to(double rx, double ry, double x_axis_rotation, bool large_arc_flag, bool sweep_flag, double x, double y, svgpp::tag::coordinate::absolute) {}
+		void path_elliptical_arc_to(double rx, double ry, double x_axis_rotation, bool large_arc_flag, bool sweep_flag, double x, double y, svgpp::tag::coordinate::absolute coordinate)
+		{
+			path_line_to(x, y, coordinate);
+		}
 
 		void path_close_subpath() {}
 
