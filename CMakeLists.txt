@@ -14,7 +14,7 @@ add_executable(${PROJECT_NAME}
    engine/GameWinMain.cpp
    engine/Game.rc)
 
-target_compile_options(${PROJECT_NAME} PRIVATE /source-charset:utf-8)
+target_compile_options(${PROJECT_NAME} PRIVATE /MP /source-charset:utf-8)
 target_compile_definitions(${PROJECT_NAME} PRIVATE UNICODE _UNICODE)
 target_link_options(${PROJECT_NAME} PRIVATE /SUBSYSTEM:WINDOWS)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20)
